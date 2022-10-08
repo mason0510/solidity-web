@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.5.2/dist/web3.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>租赁</title>
+    <style>
+        #id_btn_wallet {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .box {
+            width: 70%;
+            margin: auto;
+            margin-top: 30px;
+            padding: 10px;
+            background-color: #eee;
+            border-radius: 10px;
+        }
+
+        .box div {
+            margin: 20px;
+        }
+
+        .box div span {
+            display: inline-block;
+            width: 150px;
+        }
+
+        .box select {
+            width: 100px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div style="padding:50px;">
+        <div class="row">
+            <button id="connect_button" class="btn btn-success">connect wallet</button><br />
+            <div id="wallet_info"></div>
+        </div>
+        <h3>资产出租广告（资产拥有者挂单）</h3>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="box">
+                    <h3>挂单出租</h3>
+                    <div>
+                        <span>NFT合约资产</span>
+                        <input id="tokenContract" type="text">
+                    </div>
+                    <div>
+                        <span>tokenId</span>
+                        <input id="tokenId" type="text">
+                    </div>
+                    <div>
+                        <span>过期时间（时间戳）</span>
+                        <input id="expiration" type="number">
+                    </div>
+                    <div>
+                        <span>随机数</span>
+                        <input id="nonce" type="number">
+                    </div>
+                    <div>
+                        <span>价格（支付token，单位eth）</span>
+                        <input id="pricePerDay"  type="number">
+                    </div>
+                    <div>
+                        <span>最小天数</span>
+                        <input id="minDays"  type="number">
+                    </div>
+                    <div>
+                        <span>最大天数</span>
+                        <input id="maxDays"  type="number">
+                    </div>
+                    <button id="signature_button" class="btn btn-success" style="width:100%">提交</button>
+                    <div id="signature_res"></div>
+
+                </div>
+            </div>
+			<div class="col-sm-6">
+				<div class="box">
+                    <h3>票据</h3>
+					<div>
+						<span>签名者</span>
+						<input id="verify_signer" type="text">
+					</div>
+                    <div>
+                        <span>NFT合约资产</span>
+                        <input id="verify_tokenContract" type="text">
+                    </div>
+                    <div>
+                        <span>tokenId</span>
+                        <input id="verify_tokenId" type="text">
+                    </div>
+                    <div>
+                        <span>过期时间（时间戳）</span>
+                        <input id="verify_expiration" type="number">
+                    </div>
+                    <div>
+                        <span>随机数</span>
+                        <input id="verify_nonce" type="number">
+                    </div>
+                    <div>
+                        <span>价格（支付token，单位eth）</span>
+                        <input id="verify_pricePerDay"  type="number">
+                    </div>
+                    <div>
+                        <span>最小天数</span>
+                        <input id="verify_minDays"  type="number">
+                    </div>
+                    <div>
+                        <span>最大天数</span>
+                        <input id="verify_maxDays"  type="number">
+                    </div>
+					<div>
+                        <span>签名</span>
+                        <input id="verify_signature"  type="text">
+                    </div>
+                    <button id="verify_signature_button" class="btn btn-success" style="width:100%;margin-bottom: 100px;">验证票据</button>
+					
+					
+                    <div>
+                        <span>租赁天数</span>
+                        <input id="listing_rentalDays"  type="number">
+                    </div>					
+					<button id="rental_listing_button" class="btn btn-success" style="width:100%">租赁</button>
+                    <div id="verify_signature_res"></div>
+
+                </div>
+			</div>
+        </div>
+
+        <h3>offer广告（承租者发出offer）</h3>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="box">
+                    <h3>承租者offer</h3>
+                    <div>
+                        <span>NFT合约资产</span>
+                        <input id="offer_tokenContract" type="text">
+                    </div>
+                    <div>
+                        <span>tokenId</span>
+                        <input id="offer_tokenId" type="number">
+                    </div>
+                    <div>
+                        <span>过期时间（时间戳）</span>
+                        <input id="offer_expiration" type="number">
+                    </div>
+                    <div>
+                        <span>随机数</span>
+                        <input id="offer_nonce" type="number">
+                    </div>
+                    <div>
+                        <span>1天价格</span>
+                        <input id="offer_pricePerDay"  type="number">
+                    </div>
+                    <div>
+                        <span>租赁天数</span>
+                        <input id="offer_rentalDays"  type="number">
+                    </div>
+                    <div>
+                        <span>nft管理员</span>
+                        <input id="offer_operator"  type="text">
+                    </div>
+                    <button id="offer_signature_button" class="btn btn-success" style="width:100%">提交</button>
+                    <div id="offer_signature_res"></div>
+
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="box">
+                    <h3>票据</h3>
+                    <div>
+                        <span>签名者</span>
+                        <input id="verify_offer_signer" type="text">
+                    </div>    
+                    <div>
+                        <span>NFT合约资产</span>
+                        <input id="verify_offer_tokenContract" type="text">
+                    </div>
+                    <div>
+                        <span>tokenId</span>
+                        <input id="verify_offer_tokenId" type="number">
+                    </div>
+                    <div>
+                        <span>过期时间（时间戳）</span>
+                        <input id="verify_offer_expiration" type="number">
+                    </div>
+                    <div>
+                        <span>随机数</span>
+                        <input id="verify_offer_nonce" type="number">
+                    </div>
+                    <div>
+                        <span>1天价格</span>
+                        <input id="verify_offer_pricePerDay"  type="number">
+                    </div>
+                    <div>
+                        <span>租赁天数</span>
+                        <input id="verify_offer_rentalDays"  type="number">
+                    </div>
+                    <div>
+                        <span>nft管理员</span>
+                        <input id="verify_offer_operator"  type="text">
+                    </div>
+                    <div>
+                        <span>签名</span>
+                        <input id="verify_offer_signature"  type="text">
+                    </div>
+                    <button id="verify_offer_signature_button" class="btn btn-success" style="width:100%;margin-bottom:100px">验证票据</button>
+					<button id="rental_offer_button" class="btn btn-success" style="width:100%">接收offer</button>
+                    <div id="verify_offer_signature_res"></div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <script>
+        (async function () {
+            let $ = function (id) {
+                let s = id.charAt(0);
+                id = id.substr(1);
+                if (s === '.') {
+                    return document.getElementsByClassName(id);
+                } else if (s === '#') {
+                    return document.getElementById(id);
+                } else {
+                    return null;
+                }
+            };
+
+            const isMetaMaskInstalled = () => {
+                const { ethereum } = window;
+                return Boolean(ethereum && ethereum.isMetaMask);
+            };
+
+            let account = undefined;
+            const web3_http_provider = 'https://rinkeby.infura.io/v3/3da1993b692e48cfbad8443d021bddb5';
+            let web3 = undefined; // web3实例（写）
+            let web3reader = new Web3(new Web3.providers.HttpProvider(web3_http_provider));// web3实例（读）
+            let myContract = undefined; // 合约实例（写）
+            let myContractReader = undefined; // 合约实例（读）
+
+            let rentalContract = '0xf149157E2d6149bd3A3c1C8173EFF1bB0d1e269D'; //租赁合约
+
+            let rentalAbi = [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_contractAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_sender",
+				"type": "address"
+			}
+		],
+		"name": "AssetClaimed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_from",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_sender",
+				"type": "address"
+			}
+		],
+		"name": "FeeCollectorUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_from",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_to",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_sender",
+				"type": "address"
+			}
+		],
+		"name": "FeeUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_contractAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_sender",
+				"type": "address"
+			}
+		],
+		"name": "OperatorUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_contractAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_lessor",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_tenant",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_operator",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_rentalDays",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_pricePerDay",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_sender",
+				"type": "address"
+			}
+		],
+		"name": "RentalStarted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "contract IERC20",
+				"name": "_from",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "contract IERC20",
+				"name": "_to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_sender",
+				"type": "address"
+			}
+		],
+		"name": "TokenUpdated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "signer",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "contractAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "tokenId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "expiration",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "nonce",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "pricePerDay",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "minDays",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "maxDays",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "bytes",
+						"name": "signature",
+						"type": "bytes"
+					}
+				],
+				"internalType": "struct RentalStorage.Listing",
+				"name": "_listing",
+				"type": "tuple"
+			},
+			{
+				"internalType": "address",
+				"name": "_operator",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_index",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_rentalDays",
+				"type": "uint256"
+			}
+		],
+		"name": "acceptListing",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "signer",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "contractAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "tokenId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "expiration",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "nonce",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pricePerDay",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "rentalDays",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"internalType": "bytes",
+						"name": "signature",
+						"type": "bytes"
+					}
+				],
+				"internalType": "struct RentalStorage.Offer",
+				"name": "_offer",
+				"type": "tuple"
+			}
+		],
+		"name": "acceptOffer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_contractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "claim",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "fee",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "feeCollector",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "signer",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "contractAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "tokenId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "expiration",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "nonce",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "pricePerDay",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "minDays",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "maxDays",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "bytes",
+						"name": "signature",
+						"type": "bytes"
+					}
+				],
+				"internalType": "struct RentalStorage.Listing",
+				"name": "voucher",
+				"type": "tuple"
+			}
+		],
+		"name": "isListing",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "signer",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "contractAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "tokenId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "expiration",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "nonce",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pricePerDay",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "rentalDays",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"internalType": "bytes",
+						"name": "signature",
+						"type": "bytes"
+					}
+				],
+				"internalType": "struct RentalStorage.Offer",
+				"name": "voucher",
+				"type": "tuple"
+			}
+		],
+		"name": "isOffer",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_contractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "isRented",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"name": "onERC721Received",
+		"outputs": [
+			{
+				"internalType": "bytes4",
+				"name": "",
+				"type": "bytes4"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "rentals",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "lessor",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "tenant",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "endDate",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_fee",
+				"type": "uint256"
+			}
+		],
+		"name": "setFee",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_feeCollector",
+				"type": "address"
+			}
+		],
+		"name": "setFeeCollector",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_contractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_operator",
+				"type": "address"
+			}
+		],
+		"name": "setOperator",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "contract IERC20",
+				"name": "_token",
+				"type": "address"
+			}
+		],
+		"name": "setToken",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "token",
+		"outputs": [
+			{
+				"internalType": "contract IERC20",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
+
+            // connect wallet
+            $('#connect_button').onclick = async function () {
+                if (!isMetaMaskInstalled()) {
+                    alert('please install metamask!');
+                    return;
+                }
+                let accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                account = accounts[0];
+                web3 = new Web3(window.ethereum);
+                
+                $('#wallet_info').innerHTML = 'Address: ' + account;
+                window.ethereum.on('accountsChanged', function () {
+                    web3 = undefined;
+                    account = undefined;
+                    $('#wallet_info').innerHTML = '';
+                });
+                window.ethereum.on('chainChanged', function () {
+                    web3 = undefined;
+                    account = undefined;
+                    $('#wallet_info').innerHTML = '';
+                });
+                window.ethereum.on('disconnect', function () {
+                    web3 = undefined;
+                    account = undefined;
+                    $('#wallet_info').innerHTML = '';
+                });
+            };
+
+
+            // 出租signature
+            $('#signature_button').onclick = async function () {
+                var tokenContract = $('#tokenContract').value.trim();
+                var tokenId = $('#tokenId').value.trim();
+                var expiration = $('#expiration').value.trim();                
+                var nonce = $('#nonce').value.trim();
+                var pricePerDay = $('#pricePerDay').value.trim();
+                var minDays = $('#minDays').value.trim();
+                var maxDays = $('#maxDays').value.trim();
+
+                if (web3 == undefined || account == undefined) {
+                    alert('please connect wallet!');
+                    return;
+                }
+
+                const msgParams = JSON.stringify({
+                    domain: {
+                        name: 'rental',
+                        version: '1',
+                        chainId: 4,
+                        verifyingContract: rentalContract
+                    },
+                    message: {
+                        signer: account,
+                        contractAddress: tokenContract,
+                        tokenId: tokenId,
+                        expiration: expiration,
+                        nonce: nonce,
+                        pricePerDay: [web3.utils.toWei(pricePerDay, 'ether')],
+                        minDays: [minDays],
+                        maxDays: [maxDays]
+                    },
+                    primaryType: 'Listing',
+                    types: {
+                        EIP712Domain: [
+                            { name: 'name', type: 'string' },
+                            { name: 'version', type: 'string' },
+                            { name: 'chainId', type: 'uint256' },
+                            { name: 'verifyingContract', type: 'address' },
+                        ],
+                        Listing: [
+                            { name: "signer", type: "address" },
+                            { name: "contractAddress", type: "address" },
+                            { name: "tokenId", type: "uint256" },
+                            { name: "expiration", type: "uint256" },
+                            { name: "nonce", type: "uint256" },
+                            { name: "pricePerDay", type: "uint256[]" },
+                            { name: "minDays", type: "uint256[]" },
+                            { name: "maxDays", type: "uint256[]" }
+                        ]
+                    }
+                });
+                console.log(web3);
+                // return;
+                web3.eth.currentProvider.sendAsync({
+                    method: 'eth_signTypedData_v4',
+                    params: [account, msgParams],
+                    from: account,
+                }, function (err, ret) {
+                    console.log(ret);
+                    console.log(err);
+                    $('#signature_res').innerHTML = ret.result;
+                });
+
+
+            };
+
+            // 验证出租signature
+            $('#verify_signature_button').onclick = async function () {
+                var signer = $('#verify_signer').value.trim();
+				var tokenContract = $('#verify_tokenContract').value.trim();
+                var tokenId = $('#verify_tokenId').value.trim();
+                var expiration = $('#verify_expiration').value.trim();                
+                var nonce = $('#verify_nonce').value.trim();
+                var pricePerDay = $('#verify_pricePerDay').value.trim();
+                var minDays = $('#verify_minDays').value.trim();
+                var maxDays = $('#verify_maxDays').value.trim();
+                var signature = $('#verify_signature').value.trim();
+
+                if (web3 == undefined || account == undefined) {
+                    alert('please connect wallet!');
+                    return;
+                }
+
+                myContractReader = new web3reader.eth.Contract(rentalAbi, rentalContract); // 合约实例（读）
+                myContractReader.methods.isListing ([
+                    signer,
+                    tokenContract,
+                    tokenId,
+                    expiration,
+                    nonce,
+                    [web3.utils.toWei(pricePerDay, 'ether')],
+                    [minDays],
+                    [maxDays],
+                    web3reader.utils.hexToBytes(signature)
+                ]).call().then(function (ret) {
+                    console.log(ret);
+
+                    if(ret){
+                        alert('成功');
+                    }else{
+                        alert('失败');
+                    }
+
+                });
+
+
+            };
+
+            // 租赁
+            $('#rental_listing_button').onclick = async function () {
+                var signer = $('#verify_signer').value.trim();
+				var tokenContract = $('#verify_tokenContract').value.trim();
+                var tokenId = $('#verify_tokenId').value.trim();
+                var expiration = $('#verify_expiration').value.trim();                
+                var nonce = $('#verify_nonce').value.trim();
+                var pricePerDay = $('#verify_pricePerDay').value.trim();
+                var minDays = $('#verify_minDays').value.trim();
+                var maxDays = $('#verify_maxDays').value.trim();
+                var signature = $('#verify_signature').value.trim();
+				var rentalDays = $('#listing_rentalDays').value.trim();
+
+                if (web3 == undefined || account == undefined) {
+                    alert('please connect wallet!');
+                    return;
+                }
+
+                myContract = new web3.eth.Contract(rentalAbi, rentalContract, {
+                	from: window.ethereum.selectedAddress
+            	});
+
+				myContract.methods.acceptListing(
+					[
+						signer,
+						tokenContract,
+						tokenId,
+						expiration,
+						nonce,
+						[web3.utils.toWei(pricePerDay, 'ether')],
+						[minDays],
+						[maxDays],
+						web3reader.utils.hexToBytes(signature)
+					],
+					account,
+					0,
+					rentalDays
+				).send().then(function (ret) {
+                    console.log(ret);
+
+                    if(ret.events['RentalStarted'] != undefined){
+                        alert('success');
+                    }else{
+                        alert('error');
+                    }
+
+                });
+
+
+            };
+
+
+
+
+            // 承租offer signature
+            $('#offer_signature_button').onclick = async function () {
+                var tokenContract = $('#offer_tokenContract').value.trim();
+                var tokenId = $('#offer_tokenId').value.trim();
+                var expiration = $('#offer_expiration').value.trim();                
+                var nonce = $('#offer_nonce').value.trim();
+                var pricePerDay = $('#offer_pricePerDay').value.trim();
+                var rentalDays = $('#offer_rentalDays').value.trim();
+                var operator = $('#offer_operator').value.trim();
+
+                if (web3 == undefined || account == undefined) {
+                    alert('please connect wallet!');
+                    return;
+                }
+
+                const msgParams = JSON.stringify({
+                    domain: {
+                        name: 'rental',
+                        version: '1',
+                        chainId: 4,
+                        verifyingContract: rentalContract
+                    },
+                    message: {
+                        signer: account,
+                        contractAddress: tokenContract,
+                        tokenId: tokenId,
+                        expiration: expiration,
+                        nonce: nonce,
+                        pricePerDay: web3.utils.toWei(pricePerDay, 'ether'),
+                        rentalDays: rentalDays,
+                        operator: operator
+                    },
+                    primaryType: 'Offer',
+                    types: {
+                        EIP712Domain: [
+                            { name: 'name', type: 'string' },
+                            { name: 'version', type: 'string' },
+                            { name: 'chainId', type: 'uint256' },
+                            { name: 'verifyingContract', type: 'address' },
+                        ],
+                        Offer: [
+                            { name: "signer", type: "address" },
+                            { name: "contractAddress", type: "address" },
+                            { name: "tokenId", type: "uint256" },
+                            { name: "expiration", type: "uint256" },
+                            { name: "nonce", type: "uint256" },
+                            { name: "pricePerDay", type: "uint256" },
+                            { name: "rentalDays", type: "uint256" },
+                            { name: "operator", type: "address" }
+                        ]
+                    }
+                });
+                console.log(web3);
+                // return;
+                web3.eth.currentProvider.sendAsync({
+                    method: 'eth_signTypedData_v4',
+                    params: [account, msgParams],
+                    from: account,
+                }, function (err, ret) {
+                    console.log(ret);
+                    console.log(err);
+                    $('#offer_signature_res').innerHTML = ret.result;
+                });
+
+
+            };
+
+
+            // 验证承租offer signature
+            $('#verify_offer_signature_button').onclick = async function () {
+                var signer = $('#verify_offer_signer').value.trim();
+                var tokenContract = $('#verify_offer_tokenContract').value.trim();
+                var tokenId = $('#verify_offer_tokenId').value.trim();
+                var expiration = $('#verify_offer_expiration').value.trim();                
+                var nonce = $('#verify_offer_nonce').value.trim();
+                var pricePerDay = $('#verify_offer_pricePerDay').value.trim();
+                var rentalDays = $('#verify_offer_rentalDays').value.trim();
+                var operator = $('#verify_offer_operator').value.trim();
+                var signature = $('#verify_offer_signature').value.trim();
+
+                if (web3 == undefined || account == undefined) {
+                    alert('please connect wallet!');
+                    return;
+                }
+
+                myContractReader = new web3reader.eth.Contract(rentalAbi, rentalContract); // 合约实例（读）
+                myContractReader.methods.isOffer ([
+                    signer,
+                    tokenContract,
+                    tokenId,
+                    expiration,
+                    nonce,
+                    web3.utils.toWei(pricePerDay, 'ether'),
+                    rentalDays,
+                    operator,
+                    web3reader.utils.hexToBytes(signature)
+                ]).call().then(function (ret) {
+                    console.log(ret);
+
+                    if(ret){
+                        alert('成功');
+                    }else{
+                        alert('失败');
+                    }
+
+                });
+
+
+            };
+
+
+            // 接收承租offer
+            $('#rental_offer_button').onclick = async function () {
+                var signer = $('#verify_offer_signer').value.trim();
+                var tokenContract = $('#verify_offer_tokenContract').value.trim();
+                var tokenId = $('#verify_offer_tokenId').value.trim();
+                var expiration = $('#verify_offer_expiration').value.trim();                
+                var nonce = $('#verify_offer_nonce').value.trim();
+                var pricePerDay = $('#verify_offer_pricePerDay').value.trim();
+                var rentalDays = $('#verify_offer_rentalDays').value.trim();
+                var operator = $('#verify_offer_operator').value.trim();
+                var signature = $('#verify_offer_signature').value.trim();
+
+                if (web3 == undefined || account == undefined) {
+                    alert('please connect wallet!');
+                    return;
+                }
+                
+				myContract = new web3.eth.Contract(rentalAbi, rentalContract, {
+                	from: window.ethereum.selectedAddress
+            	});
+
+				myContract.methods.acceptOffer (
+					[
+						signer,
+                    	tokenContract,
+                    	tokenId,
+                    	expiration,
+                    	nonce,
+                    	web3.utils.toWei(pricePerDay, 'ether'),
+                    	rentalDays,
+                    	operator,
+                    	web3reader.utils.hexToBytes(signature)
+					]
+				).send().then(function (ret) {
+                    console.log(ret);
+
+                    if(ret.events['RentalStarted'] != undefined){
+                        alert('success');
+                    }else{
+                        alert('error');
+                    }
+
+                });
+
+            };
+
+
+
+
+
+        })();
+    </script>
+</body>
+
+</html>
